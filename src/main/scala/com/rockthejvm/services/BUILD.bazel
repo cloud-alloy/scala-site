@@ -1,0 +1,18 @@
+load("@constants//:vars.bzl", "SCALA_VERSION_SUFFIX")
+load("@io_bazel_rules_scala//scala:scala.bzl", "scala_library")
+
+scala_library(
+  name = "services",
+  srcs = ["ContactService.scala"],
+  visibility = [
+    "//src/main/scala/com/rockthejvm:__pkg__",
+    "//src/main/scala/com/rockthejvm/controllers:__pkg__",
+  ],
+  deps = [
+    "@mvn//:dev_zio_zio_http_{}".format(SCALA_VERSION_SUFFIX),
+    "@mvn//:dev_zio_zio_{}".format(SCALA_VERSION_SUFFIX),
+    "@mvn//:dev_zio_zio_config_typesafe_{}".format(SCALA_VERSION_SUFFIX),
+    "//src/main/scala/com/rockthejvm/domain:domain",
+    "//src/main/scala/com/rockthejvm/repositories:repositories",
+  ]
+)

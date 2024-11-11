@@ -45,3 +45,6 @@ project/project
 *.sqlite
 /http_requests/http-client.private.env.json
 /postman_collections/Conduit.postman_collection.json
+
+.bazel/**
+.bazel-cache/**

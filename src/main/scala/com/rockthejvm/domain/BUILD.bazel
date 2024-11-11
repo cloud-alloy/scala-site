@@ -1,0 +1,25 @@
+load("@constants//:vars.bzl", "SCALA_VERSION_SUFFIX")
+load("@io_bazel_rules_scala//scala:scala.bzl", "scala_library")
+
+scala_library(
+  name = "domain",
+  srcs = ["config/Configuration.scala",
+    "data/Contact.scala",
+    "errors/ErrorInfo.scala",
+    "errors/ErrorMapper.scala",
+    "errors/ServerExceptions.scala"],
+  visibility = [
+    "//src/main/scala/com/rockthejvm:__pkg__",
+    "//src/main/scala/com/rockthejvm/views:__pkg__",
+    "//src/main/scala/com/rockthejvm/services:__pkg__",
+    "//src/main/scala/com/rockthejvm/repositories:__pkg__",
+    "//src/main/scala/com/rockthejvm/db:__pkg__",
+    "//src/main/scala/com/rockthejvm/controllers:__pkg__",
+  ],
+  deps = [
+    "@mvn//:dev_zio_zio_http_{}".format(SCALA_VERSION_SUFFIX),
+    "@mvn//:dev_zio_zio_{}".format(SCALA_VERSION_SUFFIX),
+    "@mvn//:dev_zio_zio_config_magnolia_{}".format(SCALA_VERSION_SUFFIX),
+    "@mvn//:dev_zio_zio_config_typesafe_{}".format(SCALA_VERSION_SUFFIX),
+  ]
+)

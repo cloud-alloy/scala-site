@@ -1,0 +1,30 @@
+common --symlink_prefix=.bazel/
+common --enable_platform_specific_config
+
+# This fixes most of our cache issues
+startup --host_jvm_args=-DBAZEL_TRACK_SOURCE_DIRECTORIES=1
+# ^ rules_js needs this for now: https://github.com/aspect-build/rules_js/issues/1408
+build --experimental_remote_merkle_tree_cache
+build --experimental_remote_merkle_tree_cache_size=10000
+build:unix --incompatible_strict_action_env
+# ^ https://blog.aspect.build/bazelrc-flags
+
+# Java version
+build --extra_toolchains=@graalvm//:toolchain
+build --java_language_version=21
+build --java_runtime_version=graalvm_21
+build:java17 --java_language_version=17
+build:java17 --java_runtime_version=remotejdk_17
+build:java21 --java_language_version=21
+build:java21 --java_runtime_version=remotejdk_21
+
+build:macos --config=unix
+build:linux --config=unix
+
+build:unix --incompatible_enable_cc_toolchain_resolution
+build:unix --action_env BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
+
+build --strategy=Scalac=worker
+build --worker_sandboxing
+
+common --disk_cache=./.bazel-cache/bazel

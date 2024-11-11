@@ -1,0 +1,5 @@
+filegroup(
+    name = "all_resources",
+    srcs = glob(["**"]),  # includes all files and subdirectories in resources
+    visibility = ["//src/main/scala/com/rockthejvm:__pkg__"],  # make it visible to the specific BUILD file
+)

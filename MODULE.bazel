@@ -1,0 +1,96 @@
+bazel_dep(name = "rules_java", version = "7.9.1")
+bazel_dep(name = "bazel_skylib", version = "1.7.1")
+bazel_dep(name = "rules_jvm_external", version = "6.2")
+bazel_dep(name = "toolchains_llvm", version = "1.0.0")
+bazel_dep(name = "rules_oci", version = "1.4.0")
+bazel_dep(name = "aspect_bazel_lib", version = "2.9.1")
+bazel_dep(name = "rules_graalvm", version = "0.11.1")
+bazel_dep(name = "rules_pkg", version = "1.0.1")
+# Internal Extension Section
+
+constants = use_extension("//bazel:extensions.bzl", "constants")
+use_repo(constants, "constants")
+
+# C/C++ Section
+
+llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
+llvm.toolchain(
+    llvm_version = "16.0.0",
+)
+
+use_repo(llvm, "llvm_toolchain")
+
+register_toolchains("@llvm_toolchain//:all")
+
+# JVM Section
+
+SCALA_VERSION = "3"
+SCALA_BUGFIX_VERSION = "3.1"
+SCALA_FULL_VERSION = "{}.{}".format(SCALA_VERSION, SCALA_BUGFIX_VERSION)
+ZIO_VERSION = "3.0.1"
+HTTP4S_VERSION = "1.0.0-M41"
+
+constants.export(name = "constants", key = "SCALA_VERSION", value = SCALA_VERSION)
+constants.export(name = "constants", key = "SCALA_VERSION_SUFFIX", value = SCALA_VERSION.replace(".", "_"))
+constants.export(name = "constants", key = "SCALA_FULL_VERSION", value = SCALA_FULL_VERSION)
+
+maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
+
+maven.install(
+    name = "mvn",
+    artifacts = [
+        "org.jetbrains.bsp:bazel-bsp:3.2.0",
+        "com.typesafe:config:1.4.3",
+        "dev.zio:zio_{}:2.1.9".format(SCALA_VERSION),
+        #"dev.zio:zio-http_{}:3.0.1".format(SCALA_VERSION),
+        "dev.zio:zio-http_{}:3.0.0-RC4".format(SCALA_VERSION),
+        "dev.zio:zio-config-typesafe_{}:4.0.2".format(SCALA_VERSION),
+        "dev.zio:zio-config-magnolia_{}:4.0.2".format(SCALA_VERSION),
+        "dev.zio:zio-logging_{}:2.3.1".format(SCALA_VERSION),
+        "dev.zio:zio-logging-slf4j_{}:2.3.1".format(SCALA_VERSION),
+        "org.xerial:sqlite-jdbc:3.46.1.3",
+        "org.flywaydb:flyway-core:10.19.0",
+        "com.zaxxer:HikariCP:6.0.0",
+        "io.getquill:quill-jdbc-zio_{}:4.8.5".format(SCALA_VERSION),
+        "com.lihaoyi:scalatags_{}:0.13.1".format(SCALA_VERSION),
+        "ch.qos.logback:logback-classic:1.5.8",
+        "org.typelevel:cats-effect_{}:3.5.4".format(SCALA_VERSION),
+        "org.xerial:sqlite-jdbc:3.47.0.0"
+    ],
+    repositories = [
+        "https://repo1.maven.org/maven2",
+    ],
+    lock_file = "//:maven_install.json",
+    fetch_sources = True,
+    fail_if_repin_required = True,
+    strict_visibility = True,
+)
+
+use_repo(
+    maven,
+    "mvn",
+)
+gvm = use_extension("@rules_graalvm//:extensions.bzl", "graalvm")
+
+gvm.graalvm(
+    name = "graalvm",
+    version = "21.0.2",  # gvm sdk version format like `24.x.x` also supported
+    distribution = "ce",  # `oracle`, `ce`, or `community`
+    java_version = "21",  # `17`, `20`, `21`, or `22` as supported by the version provided
+)
+
+use_repo(gvm, "graalvm")
+
+register_toolchains("@graalvm//:jvm")
+register_toolchains("@graalvm//:sdk")
+register_toolchains("@graalvm//:bootstrap_runtime_toolchain")
+
+oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
+
+oci.pull(
+    name = "distroless_java",
+    digest = "sha256:161a1d97d592b3f1919801578c3a47c8e932071168a96267698f4b669c24c76d",
+    image = "gcr.io/distroless/java17",
+)
+
+use_repo(oci, "distroless_java")
