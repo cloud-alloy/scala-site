@@ -1,3 +1,8 @@
+module(
+    name = "cloud_alloy_site",
+    version = "1.0",
+)
+
 bazel_dep(name = "rules_java", version = "7.9.1")
 bazel_dep(name = "bazel_skylib", version = "1.7.1")
 bazel_dep(name = "rules_jvm_external", version = "6.2")
@@ -6,6 +11,8 @@ bazel_dep(name = "rules_oci", version = "1.4.0")
 bazel_dep(name = "aspect_bazel_lib", version = "2.9.1")
 bazel_dep(name = "rules_graalvm", version = "0.11.1")
 bazel_dep(name = "rules_pkg", version = "1.0.1")
+http_file = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
+bazel_dep(name = "platforms", version = "0.0.11")
 # Internal Extension Section
 
 constants = use_extension("//bazel:extensions.bzl", "constants")
@@ -94,3 +101,17 @@ oci.pull(
 )
 
 use_repo(oci, "distroless_java")
+
+http_file(
+    name = "tailwindcss_macos_arm",
+    urls = ["https://github.com/tailwindlabs/tailwindcss/releases/download/v4.0.7/tailwindcss-macos-arm64"],
+    executable = True,
+    sha256 = "a38a6e04f3012c80994c5ec14010903ee0e719aa6f61bad0abf169729a3f518c",  
+)
+
+http_file(
+    name = "tailwind_linux_x86_64",
+    urls = ["https://github.com/tailwindlabs/tailwindcss/releases/download/v4.0.7/tailwindcss-linux-x64"],
+    executable = True,
+    sha256 = "1ea272f97c05b62b496d721e03635045d92624a214facd83a6bcc53e9d65436a", 
+)

@@ -15,7 +15,7 @@ object ContactsView {
       errors: Map[String, String] = Map.empty
   ): Text.TypedTag[String] = {
     div(
-      `class` := "container",
+      cls := "container bg-red-500 text-white p-4",
       form(
         action := "/contacts/new",
         method := "post",

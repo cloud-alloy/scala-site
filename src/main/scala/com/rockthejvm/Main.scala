@@ -28,7 +28,7 @@ object Main extends ZIOAppDefault {
 
     val basicRoutes = Routes(
       Method.GET / "" -> handler(Response.redirect(Redirects.contacts)),
-      Method.GET / "static" / "css" / "main.css" -> Handler.fromResource("css/main.css").orDie
+      Method.GET / "static" / "css" / "main.css" -> Handler.fromResource("static/css/main.css").orDie
     )
 
     val htmxApp = ZIO.service[ContactsController].map { contacts =>
@@ -46,7 +46,6 @@ object Main extends ZIOAppDefault {
         _ <- Server.serve(app @@ Middleware.debug @@ Middleware.flashScopeHandling)
         _ <- ZIO.logInfo("Server started - Rock the JVM!")
       } yield ()
-      
     program.provide(
         Configuration.live,
         DbConfig.live,
@@ -74,12 +73,17 @@ object Main extends ZIOAppDefault {
   }
 
   private def listFilesInDirectory(dir: File): Seq[String] = {
+
     if (dir.exists && dir.isDirectory) {
-      dir.listFiles.flatMap {
+      dir
+      .listFiles
+      .toIndexedSeq
+      .flatMap {
         case file if file.isDirectory => listFilesInDirectory(file)
-        case file                     => Seq(file.getPath)
+        case file => Seq(file.getPath())
       }
     } else Seq.empty
+
   }
 
   private def listFilesInJar(url: URL, path: String): Seq[String] = {
